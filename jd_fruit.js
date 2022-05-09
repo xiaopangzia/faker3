@@ -489,8 +489,7 @@ async function doTenWaterAgain() {
 			break;
 	    }
 	}
-	if ($.myCardInfoRes.beanCard>0)
-		return;   
+	return;   
   }
   // if (totalEnergy > 100 && $.myCardInfoRes.fastCard > 0) {
   //   //使用快速浇水卡
