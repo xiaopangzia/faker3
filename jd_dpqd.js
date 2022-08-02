@@ -1,17 +1,47 @@
 /*
-店铺签到，各类店铺签到，有新的店铺直接添加token即可
-============Quantumultx===============
-[task_local]
-#店铺签到
-15 2,14 * * * https://raw.githubusercontent.com/shufflewzc/faker2/main/jd_shop_sign.js, tag=店铺签到, enabled=true
-===========Loon============
-[Script]
-cron "15 2,14 * * *" script-path=https://raw.githubusercontent.com/shufflewzc/faker2/main/jd_shop_sign.js,tag=店铺签到
-============Surge=============
-店铺签到 = type=cron,cronexp="15 2,14 * * *",wake-system=1,timeout=3600,script-path=https://raw.githubusercontent.com/shufflewzc/faker2/main/jd_shop_sign.js
-===========小火箭========
-店铺签到 = type=cron,script-path=https://raw.githubusercontent.com/shufflewzc/faker2/main/jd_shop_sign.jss, cronexpr="15 2,14 * * *", timeout=3600, enable=true
+cron 45 0 0,23 * * * jd_dpqd.js
+店铺签到，店铺Token默认从本地环境变量DPQDTK中获取，若本地无则从远端获取。
+
+Fix by HarbourJ
+TG: https://t.me/HarbourToulu
+
+环境变量:
+DPQDTK: token1&token2
+仓库不再提供token
 */
+
+let token = []
+if (process.env.DPQDTK) {
+  if (process.env.DPQDTK.includes('\n')) {
+    token = [...process.env.DPQDTK.split('\n'),...token]
+  } else {
+    token = [...process.env.DPQDTK.split('&'),...token]
+  }
+}
+
+if (!token.length) {
+  console.log('无本地店铺签到token, 尝试获取远端店铺签到token')
+  token = [
+      'C1B3B8D4BBE96E6A3EF0C12F27F868D3',
+      'AB549463C778127E4A3EA0F9AE447F43',
+      '30D17316E31067004ED239DE9F121B0D',
+      '5ADCA39CC24D5F7A9203D485CB6E315E',
+      '897010DC16CE14E18C6539CAD1A05CAB',
+      'C36E42C7BA5F40A75AB1BF3D38C007A7',
+      '9A7B8B816C48227DDA5007490CFCB33C',
+      '04CC7B1B2CBB41F9B38D0E2EAF5A9FA6',
+      'CC8AB17E5EDC1E6791D64AB83567525A',
+      '37D0FAA99892A9E613A1B46E5A55973B',
+      '7D9366077646C53C943688FC04FB5D59',
+      '96F2392DACD1DC4603F3E090792C9AEC',
+      'D09126C24A62EA49DEDD538D4D85F6A7',
+      '8D650ABF6E6BE3C3C20715CA02434670',
+      'E6C5F271F81BE651D01372C6BB826446',
+      '5E75F128888B2002D54A69A92BCE64AB',
+      'FF584AB3FBCB3C7C4F75BE0ACFAD184C',
+  ]
+}
+console.log(token)
 const $ = new Env('店铺签到');
 const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
@@ -24,30 +54,6 @@ let activityId=''
 let vender=''
 let num=0
 let shopname=''
-const token = [
-  "7B5E686A0CAF1C144620A3FFE04AFF1E",
-  "8CD869EFF46D7EAB899C0FB67AEA8D5C",
-  "3949F55A02AA8A345409AFD9821C861F",
-  "FBBDFE44FCD20A18A7D736DC3F640BCA",
-  "A92269DC92DDD73CC5EB38B3BACF51E3",
-  "94C7B64A6137E339AAA79DC3A6465C1B",
-	"1DD46671387EAC6FDC14B753E01D5E30",
-	"BD0D2682B13A75E0AAF7D8E78844F07C",
-	"662E62C629FB6B20CED938E41A0DC026",
-	"F573A078062F9F18BFCC39080864D7F5",
-  "D7DCB5D6D847EB0167C2B0A180B95F68",
-	"582EA3EA048A3D49961766498A136F9C",
-	"A44D1CA090231A92D24F0B1E5B38BD5A",
-	"67D2D5824D043A5C2EA9C53B900B932C",
-	"2C8CBED431A4A275155387ABDF958427",
-	"833CE1B5158A097598C07D4B2B5B314E",
-	"37D0FAA99892A9E613A1B46E5A55973B",
-	"D35923E942C11178C38BD29E783695B8",
-	"BAA79A7D2FCE5AB8D844A9CA384A7D03",
-	"DB872465EDEB653BB501819F9B9DD326",
-	"532A161D5F27365E3BA5D0BB0A9FB8BA",
-	"BC28601FD2C5B9A5D50038825C842358"
-]
 
 if ($.isNode()) {
   Object.keys(jdCookieNode).forEach((item) => {
@@ -77,7 +83,7 @@ if ($.isNode()) {
       $.isLogin = true;
       $.nickName = '';
       message = '';
-      //await TotalBean();
+      await TotalBean();
       console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
       if (!$.isLogin) {
         $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, {"open-url": "https://bean.m.jd.com/bean/signIndex.action"});
