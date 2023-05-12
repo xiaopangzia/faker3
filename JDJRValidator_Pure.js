@@ -221,10 +221,12 @@ class JDJRValidator {
     this.data = {};
     this.x = 0;
     this.t = Date.now();
+    this.trynum = 0;
   }
 
   async run(scene) {
     try {
+      if (this.trynum > 5) return '';
       const tryRecognize = async () => {
         const x = await this.recognize(scene);
 
@@ -232,7 +234,7 @@ class JDJRValidator {
           return x;
         }
         // retry
-        return await tryRecognize();
+        return 124;
       };
       const puzzleX = await tryRecognize();
       // console.log(puzzleX);
@@ -241,6 +243,7 @@ class JDJRValidator {
 
       // console.log(pos[pos.length-1][2] -Date.now());
       // await sleep(4500);
+	  //console.log(pos[pos.length - 1][2] - Date.now());
       await sleep(pos[pos.length - 1][2] - Date.now());
       const result = await JDJRValidator.jsonp('/slide/s.html', {d, ...this.data}, scene);
 
@@ -250,6 +253,7 @@ class JDJRValidator {
         return result;
       } else {
         console.count("验证失败");
+        this.trynum++
         // console.count(JSON.stringify(result));
         await sleep(300);
         return await this.run(scene);
@@ -263,6 +267,7 @@ class JDJRValidator {
     try {
       const data = await JDJRValidator.jsonp('/slide/g.html', {e: ''}, scene);
       const {bg, patch, y} = data;
+	  if (bg.length < 10000) return;
       // const uri = 'data:image/png;base64,';
       // const re = new PuzzleRecognizer(uri+bg, uri+patch, y);
       const re = new PuzzleRecognizer(bg, patch, y);
@@ -542,6 +547,7 @@ function injectToRequest2(fn, scene = 'cww') {
 async function injectToRequest(scene = 'cww') {
   console.log('JDJR验证中......');
   const res = await new JDJRValidator().run(scene);
+  if (res == '') return;
   return res.validate;
 }
 
